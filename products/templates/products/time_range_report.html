@@ -1,0 +1,22 @@
+{% extends "products/base.html" %}
+
+{% block title %}
+    Time range report
+{% endblock title%}
+
+{% block content %}
+    <form method="GET">
+        {{ search_form.as_p }}
+        <input type="submit" value="Request">
+    </form>
+
+<!--TODO Write desired data displaying format  -->
+    {% for order in orders %}
+        <p>{{ order.number }}</p>
+        <p>{{ order.created_date }}</p>
+        <hr>
+    {% empty %}
+        <p>No orders were made in asked time</p>
+    {% endfor %}
+
+{% endblock content %}
