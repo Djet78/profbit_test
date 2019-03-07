@@ -19,7 +19,7 @@ class Command(BaseCommand):
         if orders_amount <= 0:
             raise CommandError('"orders_amount" argument must be bigger than 0!')
 
-        for iter_num in range(orders_amount + 1):
+        for iter_num in range(orders_amount):
             order_time = self.START_DATE + (self.TIME_STEP * iter_num)
             curr_order = Order.objects.create(number=iter_num, created_date=order_time)
 
