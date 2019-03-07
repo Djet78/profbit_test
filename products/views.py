@@ -1,5 +1,5 @@
 from django.db import connection
-from django.db.models import Sum, F, DecimalField
+from django.db.models import DecimalField, Sum, F
 from django.shortcuts import render
 from django.views import View
 
@@ -18,6 +18,8 @@ class SelectedTimeOrderView(View):
     }
 
     def get(self, request, *args, **kwargs):
+        """ Renders report with orders within asked time, or for all the time if time wan't specified. """
+
         if not request.GET:
             context = {
                     'search_form': self.search_form(),
@@ -40,6 +42,7 @@ class SelectedTimeOrderView(View):
         # query, so connections amount will be the same.
         if context['orders']:
             pass
+
         context['connections'] = len(connection.queries)
 
         return render(request, self.template_name, context)
@@ -57,7 +60,7 @@ class MostPurchasedView(View):
     TOP_N_SLICE = 100
 
     def get(self, request, *args, **kwargs):
-        """ Renders view with 'self.TOP_N_SLICE' sold products """
+        """ Renders view with 'self.TOP_N_SLICE' sold products. """
 
         # I don't like this solution, because it hits db for every product in a list.
         # But this is the one I've ended up with. Would be worse if i did't implement task at all, I think.

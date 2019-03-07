@@ -8,6 +8,7 @@ from products.models import Order, OrderItem
 class Command(BaseCommand):
     help = 'Generate given amount of orders'
     requires_migrations_checks = True
+
     START_DATE = datetime(2018, 1, 1, 9)
     TIME_STEP = timedelta(hours=1)
 

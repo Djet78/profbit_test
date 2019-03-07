@@ -18,7 +18,7 @@
                 <th>Product</th>
                 <th>Data</th>
             </tr>
-            {% for product in top_sellers %}
+            {% for product in top_sellers.iterator %}
                 <tr>
                     <td>{{ product.product_name }}</td>
                     <td>
