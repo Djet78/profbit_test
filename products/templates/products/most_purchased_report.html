@@ -2,8 +2,45 @@
 
 {% block title %}
     Most Purchased report
-{% endblock title%}
+{% endblock %}
+
+{% block report_type %}
+    Most Purchased Products
+{% endblock %}
 
 {% block content %}
-    <h1>Most Purchased report</h1>
+
+    <h2>DB Connections: {{ connections }}</h2>
+
+    {% if top_sellers.exists %}
+        <table>
+            <tr>
+                <th>Product</th>
+                <th>Data</th>
+            </tr>
+            {% for product in top_sellers %}
+                <tr>
+                    <td>{{ product.product_name }}</td>
+                    <td>
+                        <table>
+                            <tr>
+                                <th>Order №</th>
+                                <th>Price</th>
+                                <th>Date</th>
+                            </tr>
+                            {% for prod_data in product.orders %}
+                                <tr>
+                                    <td>{{ prod_data.order.number }}</td>
+                                    <td>{{ prod_data.product_price }}</td>
+                                    <td>{{ prod_data.order.created_date }}</td>
+                                </tr>
+                            {% endfor %}
+                        </table>
+                    </td>
+                </tr>
+            {% endfor %}
+        </table>
+    {% else %}
+        <p>We didn't sold any product</p>
+    {% endif %}
 {% endblock content %}

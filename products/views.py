@@ -54,6 +54,29 @@ class SelectedTimeOrderView(View):
 class MostPurchasedView(View):
     template_name = 'products/most_purchased_report.html'
 
+    TOP_N_SLICE = 100
+
     def get(self, request, *args, **kwargs):
-        context = {}
+        """ Renders view with 'self.TOP_N_SLICE' sold products """
+
+        # I don't like this solution, because it hits db for every product in a list.
+        # But this is the one I've ended up with. Would be worse if i did't implement task at all, I think.
+        # I'll try to found better solution for this.
+
+        top_sellers = OrderItem.objects.values('product_name') \
+                               .annotate(total_selled=Sum('amount')) \
+                               .order_by('-total_selled')[:self.TOP_N_SLICE]
+
+        for prod in top_sellers:
+            prod['orders'] = OrderItem.objects.filter(product_name=prod['product_name']).select_related()
+
+            # DB Trigger, like in the view above
+            if prod['orders']:
+                pass
+
+        context = {
+            'connections': len(connection.queries),
+            'top_sellers': top_sellers,
+        }
+
         return render(request, self.template_name, context)
