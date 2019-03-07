@@ -2,13 +2,32 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Profbit - {% block title %}{% endblock title %}</title>
+    <title>Profbit - {% block title %}{% endblock %}</title>
+
+    <style>
+        table {
+          font-family: arial, sans-serif;
+          border-collapse: collapse;
+          width: 100%;
+        }
+
+        td, th {
+          border: 1px solid black;
+          text-align: left;
+          padding: 8px;
+        }
+
+        tr:nth-child(even) {
+          background-color: #dddddd;
+        }
+    </style>
+
 </head>
 <body>
-    <h1>Test</h1>
+    <h1>Report Type: {% block report_type%} Not specified {% endblock %}</h1>
 
     {% block content %}
-    {% endblock content %}
+    {% endblock %}
 
 </body>
 </html>

@@ -1,3 +1,5 @@
+from django.db import connection
+from django.db.models import Sum, F, DecimalField
 from django.shortcuts import render
 from django.views import View
 
@@ -32,10 +34,21 @@ class SelectedTimeOrderView(View):
                 }
                 context['orders'] = self._get_query(**query_params)
 
+        #   Force query execution in order to have connections amount value below.
+        # Reason: Since queries are lazy, i can't put connections amount value to the top of the
+        # page, because in natural way query will be executed after it. And view will use cached
+        # query, so connections amount will be the same.
+        if context['orders']:
+            pass
+        context['connections'] = len(connection.queries)
+
         return render(request, self.template_name, context)
 
     def _get_query(self, **query_params):
-        return self.model.objects.select_related().filter(**query_params)
+        orders = self.model.objects.filter(**query_params).annotate(
+            total_cost=Sum(F('items__product_price') * F('items__amount'), output_field=DecimalField())
+        ).prefetch_related('items')
+        return orders
 
 
 class MostPurchasedView(View):
