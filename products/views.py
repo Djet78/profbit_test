@@ -98,7 +98,7 @@ class MostPurchasedView(View):
 
         report = {}
 
-        for record in order_items_records:
+        for record in order_items_records.iterator():
             # Using 'in' here because it works faster than dict.get() method.
             if record.product_name not in report:
                 report[record.product_name] = []
@@ -110,4 +110,5 @@ class MostPurchasedView(View):
                         'order_dt': record.order.created_date,
                     }
                 )
+
         return report
