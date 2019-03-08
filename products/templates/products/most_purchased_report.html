@@ -12,15 +12,15 @@
 
     <h2>DB Connections: {{ connections }}</h2>
 
-    {% if top_sellers.exists %}
+    {% if report %}
         <table>
             <tr>
                 <th>Product</th>
                 <th>Data</th>
             </tr>
-            {% for product in top_sellers.iterator %}
+            {% for product, data in report.items %}
                 <tr>
-                    <td>{{ product.product_name }}</td>
+                    <td>{{ product }}</td>
                     <td>
                         <table>
                             <tr>
@@ -28,11 +28,11 @@
                                 <th>Price</th>
                                 <th>Date</th>
                             </tr>
-                            {% for prod_data in product.orders %}
+                            {% for prod_data in data %}
                                 <tr>
-                                    <td>{{ prod_data.order.number }}</td>
-                                    <td>{{ prod_data.product_price }}</td>
-                                    <td>{{ prod_data.order.created_date }}</td>
+                                    <td>{{ prod_data.order_number }}</td>
+                                    <td>{{ prod_data.price }}</td>
+                                    <td>{{ prod_data.order_dt }}</td>
                                 </tr>
                             {% endfor %}
                         </table>

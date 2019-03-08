@@ -40,9 +40,7 @@ class SelectedTimeOrderView(View):
         # Reason: Since queries are lazy, i can't put connections amount value to the top of the
         # page, because in natural way query will be executed after it. And view will use cached
         # query, so connections amount will be the same.
-        if context['orders']:
-            pass
-
+        bool(context['orders'])
         context['connections'] = len(connection.queries)
 
         return render(request, self.template_name, context)
@@ -60,26 +58,56 @@ class MostPurchasedView(View):
     TOP_N_SLICE = 100
 
     def get(self, request, *args, **kwargs):
-        """ Renders view with 'self.TOP_N_SLICE' sold products. """
+        """ Renders view with 'self.TOP_N_SLICE' most sold products related data. """
 
-        # I don't like this solution, because it hits db for every product in a list.
-        # But this is the one I've ended up with. Would be worse if i did't implement task at all, I think.
-        # I'll try to found better solution for this.
+        context = {'report': self._get_report()}
 
-        top_sellers = OrderItem.objects.values('product_name') \
-                               .annotate(total_selled=Sum('amount')) \
-                               .order_by('-total_selled')[:self.TOP_N_SLICE]
-
-        for prod in top_sellers:
-            prod['orders'] = OrderItem.objects.filter(product_name=prod['product_name']).select_related()
-
-            # DB Trigger, like in the view above
-            if prod['orders']:
-                pass
-
-        context = {
-            'connections': len(connection.queries),
-            'top_sellers': top_sellers,
-        }
+        # DB Trigger
+        bool(context['report'])
+        context['connections'] = len(connection.queries)
 
         return render(request, self.template_name, context)
+
+    def _get_report(self):
+        """ Generates dict with data for report
+
+        Dict format: {
+            'prod_name_1': [
+                {
+                    'order_number': record_num,
+                    'price': record_price,
+                    'order_dt': record_datetime,
+                },
+                {
+                    Other records associated to product...
+                },
+            ],
+            'prod_name_n': [
+                ...
+            ]
+        }
+        """
+        # This approach limits db hits to 2, but have bad memory and time complexity.
+        # I'll try to find something better than that.
+
+        top_sellers = OrderItem.objects.values_list('product_name', flat=True) \
+                                       .annotate(total_selled=Sum('amount')) \
+                                       .order_by('-total_selled')[:self.TOP_N_SLICE]
+
+        order_items_records = OrderItem.objects.select_related().filter(product_name__in=list(top_sellers))
+
+        report = {}
+
+        for record in order_items_records:
+            # Using 'in' here because it works faster than dict.get() method.
+            if record.product_name not in report:
+                report[record.product_name] = []
+            else:
+                report[record.product_name].append(
+                    {
+                        'price': record.product_price,
+                        'order_number': record.order.number,
+                        'order_dt': record.order.created_date,
+                    }
+                )
+        return report
