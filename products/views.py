@@ -87,7 +87,7 @@ class MostPurchasedView(View):
             ]
         }
         """
-        # This approach limits db hits to 2, but have bad memory and time complexity.
+        # This approach limits db hits to 2, but have bad time complexity.
         # I'll try to find something better than that.
 
         top_sellers = OrderItem.objects.values_list('product_name', flat=True) \
